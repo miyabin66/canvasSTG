@@ -124,3 +124,88 @@ class Actor extends EventDispatcher {
         this.hitArea.y = value + this._hitAreaOffsetY;
     }
 }
+
+class SpriteActor extends Actor {
+    constructor(x, y, sprite, hitArea, tags=[]) {
+        super(x, y, hitArea, tags);
+        this.sprite = sprite;
+        this.width = sprite.rectangle.width;
+        this.height = sprite.rectangle.height;
+    }
+
+    render(target) {
+        const context = target.getContext('2d');
+        const rect = this.sprite.rextangle;
+        context.drawImage(
+            this.sprite.image,
+            rect.x, rect.y,
+            rect.width, rect.height,
+            this.x, this.y,
+            rect.width, rect.height
+        );
+    }
+
+    isOutOfBounds(boundRect) {
+        const actorLeft = this.x;
+        const actorRight = this.x + this.width;
+        const actorTop = this.y;
+        const actorBottom = this.y + this.height;
+
+        const horizontal = (actorRight < boundRect.x || actorLeft > boundRect.width);
+        const vertical = (actorBottom < boundRect.y || actorTop > boundRect.height);
+
+        return (horizontal || vertical);
+    }
+}
+
+class Input {
+    constructor(keyMap, prevKeyMap) {
+        this.keyMap = keyMap;
+        this.prevKeyMap = prevKeyMap;
+    }
+
+    _getKeyFromMap(keyName, map) {
+        if(map.has(keyName)) {
+            return map.get(keyName);
+        } else {
+            return false;
+        }
+    }
+
+    _getPrevKey(keyName){
+        return this._getKeyFromMap(keyName, this.prevKeyMap);
+    }
+
+    getKey(keyName) {
+        return this._getKeyFromMap(keyName, this.keyMap);
+    }
+
+    getKeyDown(keyName) {
+        const prevDown = this._getPrevKey(keyName);
+        const currentDown = this.getKey(keyName);
+        return (!prevDown && currentDown);
+    }
+
+    getKeyUp(keyName) {
+        const prevDown = this._getPrevKey(keyName);
+        const currentDown = this.getKey(keyName);
+        return (prevDown && !currentDown);
+    }
+}
+
+class InputReceiver {
+    constructor() {
+        this._keyMap = new Map();
+        this._prevKeyMap = new Map();
+
+        addEventListener('keydown', (ke) => this._keyMap.set(ke.key, true));
+        addEventListener('keyup', (ke) => this._keyMap.set(ke.key, false));
+    }
+
+    getInput() {
+        const keyMap = new Map(this._keyMap);
+        const prevKeyMap = new Map(this._prevKeyMap);
+        this._prevKeyMap = new Map(this._keyMap);
+        return new Input(keyMap, prevKeyMap);
+    }
+}
