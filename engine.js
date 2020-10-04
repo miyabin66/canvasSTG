@@ -273,7 +273,7 @@ class Scene extends EventDispatcher {
     }
 
     _renderAll() {
-        this.actors.forEach((obj) => render(this.renderingTarget));
+        this.actors.forEach((obj) => obj.render(this.renderingTarget));
     }
 
     _addDestroyedActor(actor) {
@@ -292,5 +292,54 @@ class GameInfomation {
         this.screenRectangle = screenRectangle;
         this.maxFps = maxFps;
         this.currentFps = currentFps;
+    }
+}
+
+class Game {
+    constructor(title, width, height, maxFps) {
+        this.title = title;
+        this.width = width;
+        this.height = height;
+        this.maxFps = maxFps;
+        this.currentFps = 0;
+
+        this.screenCanvas = document.createElement('canvas');
+        this.screenCanvas.width = width;
+        this.screenCanvas.height = height;
+
+        this._inputReciever = new InputReceiver();
+        this._prevTimestamp = 0;
+
+        console.log(`${title}が初期化されました。`);
+    }
+
+    changeScene(newScene) {
+        this.currentScene = newScene;
+        this.currentScene.addEventListener('changescene', (e) => this.chengeScene(e.target));
+        console.log(`シーンが${newScene.name}に切り替わりました。`);
+    }
+
+    start() {
+        requestAnimationFrame(this._loop.bind(this));
+    }
+
+    _loop(timestamp) {
+        const elaspedSec = (timestamp - this._prevTimestamp) / 1000;
+        const accuracy = 0.9;
+        const frameTime = 1 / this.maxFps * accuracy;
+        if(elaspedSec <= frameTime) {
+            requestAnimationFrame(this._loop.bind(this));
+            return;
+        }
+
+        this._prevTimestamp = timestamp;
+        this.currentFps = 1 / elaspedSec;
+
+        const screenRectangle = new Rectangle(0, 0, this.width, this.height);
+        const info = new GameInfomation(this.title, screenRectangle, this.maxFps, this.currentFps);
+        const input = this._inputReceiver.getInput();
+        this.currentScene.update(info, input);
+
+        requestAnimationFrame(this._loop.bind(this));
     }
 }
