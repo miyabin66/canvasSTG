@@ -135,7 +135,7 @@ class SpriteActor extends Actor {
 
     render(target) {
         const context = target.getContext('2d');
-        const rect = this.sprite.rextangle;
+        const rect = this.sprite.rectangle;
         context.drawImage(
             this.sprite.image,
             rect.x, rect.y,
@@ -307,7 +307,7 @@ class Game {
         this.screenCanvas.width = width;
         this.screenCanvas.height = height;
 
-        this._inputReciever = new InputReceiver();
+        this._inputReceiver = new InputReceiver();
         this._prevTimestamp = 0;
 
         console.log(`${title}が初期化されました。`);
@@ -315,7 +315,7 @@ class Game {
 
     changeScene(newScene) {
         this.currentScene = newScene;
-        this.currentScene.addEventListener('changescene', (e) => this.chengeScene(e.target));
+        this.currentScene.addEventListener('changescene', (e) => this.changeScene(e.target));
         console.log(`シーンが${newScene.name}に切り替わりました。`);
     }
 
