@@ -224,7 +224,7 @@ class Scene extends EventDispatcher {
     add(actor) {
         this.actors.push(actor);
         actor.addEventListener('spawnactor', (e) => this.add(e.target));
-        actor.addEventListener('destroy', (e) => this._addDestoryActor(e.target));
+        actor.addEventListener('destroy', (e) => this._addDestroyedActor(e.target));
     }
 
     remove(actor) {
