@@ -1,19 +1,5 @@
 'use strict';
 
-class Title extends Actor {
-  constructor(x,y) {
-    const hitArea = new Rectangle(0, 0, 0, 0);
-    super(x, y, hitArea);
-  }
-
-  render(target) {
-    const context = target.getContext('2d');
-    context.font = '25px sans-serif';
-    context.fillStyle = 'white';
-    context.fillText('弾幕STG', this.x, this.y);
-  }
-}
-
 class Bullet extends SpriteActor {
   constructor(x, y) {
     const sprite = new Sprite(assets.get('sprite'), new Rectangle(0, 16, 16, 16));
@@ -198,6 +184,54 @@ class EnemyHpBar extends Actor {
   }
 }
 
+class TextLabel extends Actor {
+  constructor(x, y, text) {
+    const hitArea = new Rectangle(0, 0, 0, 0);
+    super(x, y, hitArea);
+    
+    this.text = text;
+  }
+
+  render(target) {
+    const context = target.getContext('2d');
+    context.font = '25px sans-serif';
+    context.fillStyle = 'white';
+    context.fillText(this.text, this.x, this.y);
+  }
+}
+
+class DanmakuStgEndScene extends Scene {
+  constructor(renderingTarget) {
+    super('クリア', 'black', renderingTarget);
+    const text = new TextLabel(60, 200, 'ゲームクリア！');
+    this.add(text);
+  }
+}
+
+class DanmakuStgGameOverScene extends Scene {
+  constructor(renderingTarget) {
+    super('ゲームオーバー', 'black', renderingTarget);
+    const text = new TextLabel(50, 200, 'ゲームオーバー…');
+    this.add(text);
+  }
+}
+
+class DanmakuStgTitleScene extends Scene {
+  constructor(renderingTarget) {
+    super('タイトル', 'black', renderingTarget);
+    const title = new TextLabel(100, 200, '弾幕STG');
+    this.add(title);
+  }
+
+  update(gameInfo, input) {
+    super.update(gameInfo, input);
+    if(input.getKeyDown(' ')) {
+      const mainScene = new DanmakuStgMainScene(this.renderingTarget);
+      this.changeScene(mainScene);
+    }
+  }
+}
+
 class DanmakuStgMainScene extends Scene {
   constructor(renderingTarget) {
     super('メイン', 'black', renderingTarget);
@@ -207,22 +241,18 @@ class DanmakuStgMainScene extends Scene {
     this.add(fighter);
     this.add(enemy);
     this.add(hpBar);
-  }
-}
 
-class DanmakuStgTitleScene extends Scene {
-  constructor(renderingTarget) {
-    super('タイトル', 'black', renderingTarget);
-    const title = new Title(100, 200);
-    this.add(title);
-  }
+    // 自機がやられたらゲームオーバー画面にする
+    fighter.addEventListener('destroy', (e) => {
+      const scene = new DanmakuStgGameOverScene(this.renderingTarget);
+      this.changeScene(scene);
+    });
 
-  update(gameInfo, input) {
-    super.update(gameInfo, input);
-    if(input.getKeyDown(' ')) {
-        const mainScene = new DanmakuStgMainScene(this.renderingTarget);
-        this.changeScene(mainScene);
-    }
+    // 敵がやられたらクリア画面にする
+    enemy.addEventListener('destroy', (e) => {
+      const scene = new DanmakuStgEndScene(this.renderingTarget);
+      this.changeScene(scene);
+    });
   }
 }
 
