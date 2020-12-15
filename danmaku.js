@@ -144,6 +144,46 @@ class SpiralBulletsSpawner extends Actor {
   }
 }
 
+class FireworksBullet extends EnemyBullet {
+  constructor(x, y, velocityX, velocityY, explosionTime) {
+    super(x, y, velocityX, velocityY);
+
+    this._eplasedTime = 0;
+    this.explosionTime = explosionTime;
+  }
+
+  // degree度の方向にspeedの速さで弾を発射する
+  shootBullet(degree, speed) {
+    const rad = degree / 180 * Math.PI;
+    const velocityX = Math.cos(rad) * speed;
+    const velocityY = Math.sin(rad) * speed;
+
+    const bullet = new EnemyBullet(this.x, this.y, velocityX, velocityY);
+    this.spawnActor(bullet);
+  }
+
+  // num個の弾を円形に発射する
+  shootCircularBullets(num, speed) {
+    const degree = 360 / num;
+    for(let i = 0; i < num; i++) {
+      this.shootBullet(degree * i, speed);
+    }
+  }
+
+  update(gameInfo, input) {
+    super.update(gameInfo, input);
+
+    // 経過時間を記録する
+    this._eplasedTime++;
+    
+    // 爆発時間を超えたら弾を生成して自身を破棄する
+    if(this._eplasedTime > this.explosionTime) {
+      this.shootCircularBullets(10, 2);
+      this.destroy();
+    }
+  }
+}
+
 class Enemy extends SpriteActor {
   constructor(x, y) {
     const sprite = new Sprite(assets.get('sprite'), new Rectangle(16, 0, 16, 16));
@@ -153,8 +193,8 @@ class Enemy extends SpriteActor {
     this.maxHp = 50;
     this.currentHp = this.maxHp;
     
-    this._interval = 500;
-    this._timeCount = this._interval;
+    this._interval = 100;
+    this._timeCount = 0;
 
     // プレイヤーの弾に当たったらHPを減らす
     this.addEventListener('hit', (e) => {
@@ -169,8 +209,11 @@ class Enemy extends SpriteActor {
     // インターバルを経過していたら弾を撃つ
     this._timeCount++;
     if(this._timeCount > this._interval) {
-      const spawner = new SpiralBulletsSpawner(this.x, this.y, 4);
-      this.spawnActor(spawner);
+      const spdX = Math.random() * 4 - 2; // -2〜+2
+      const spdY = Math.random() * 4 - 2;
+      const explosionTime = 50;
+      const bullet = new FireworksBullet(this.x, this.y, spdX, spdY, explosionTime);
+      this.spawnActor(bullet);
       this._timeCount = 0;
     }
 
