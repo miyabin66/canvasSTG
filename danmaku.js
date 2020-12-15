@@ -78,22 +78,69 @@ class Fighter extends SpriteActor {
 }
 
 class EnemyBullet extends SpriteActor {
-  constructor(x, y, velocityX, velocityY) {
+  constructor(x, y, velocityX, velocityY, isFrozen = false) {
     const sprite = new Sprite(assets.get('sprite'), new Rectangle(16, 16, 16, 16));
     const hitArea = new Rectangle(4, 4, 8, 8);
     super(x, y, sprite, hitArea, ['enemyBullet']);
 
     this.velocityX = velocityX;
     this.velocityY = velocityY;
+    this.isFrozen = isFrozen;
   }
 
   update(gameInfo, input) {
-    this.x += this.velocityX;
-    this.y += this.velocityY;
+    if(!this.isFrozen) {
+      this.x += this.velocityX;
+      this.y += this.velocityY;
+    }
 
     if(this.isOutOfBounds(gameInfo.screenRectangle)) {
-        this.destroy();
+      this.destroy();
     }
+  }
+}
+
+class SpiralBulletsSpawner extends Actor {
+  constructor(x, y, rotations) {
+    const hitArea = new Rectangle(0, 0, 0, 0);
+    super(x, y, hitArea);
+
+    this._rotations = rotations;
+    this._interval = 2;
+    this._timeCount = 0;
+    this._angle = 0;
+    this._radius = 10;
+    this._bullets = [];
+  }
+
+  update(gameInfo, input) {
+    // 指定回数回転したらやめる
+    const rotation = this._angle / 360;
+    if(rotation >= this._rotations) {
+      this._bullets.forEach((b) => b.isFrozen = false); // 凍結解除
+      this.destroy();
+      return;
+    }
+
+    // インターバル経過までは何もしない
+    this._timeCount ++;
+    if(this._timeCount < this._interval) { return; }
+    this._timeCount = 0;
+    
+    // 角度と半径を増加させていく
+    this._angle += 10;
+    this._radius += 1;
+
+    // 弾を発射する
+    const rad = this._angle / 180 * Math.PI;
+    const bX = this.x + Math.cos(rad) * this._radius;
+    const bY = this.y + Math.sin(rad) * this._radius;
+    const bSpdX = Math.random() * 2 - 1; // -1〜+1
+    const bSpdY = Math.random() * 2 - 1;
+    const bullet = new EnemyBullet(bX, bY, bSpdX, bSpdY, true);
+    this._bullets.push(bullet);
+
+    this.spawnActor(bullet);
   }
 }
 
@@ -105,13 +152,9 @@ class Enemy extends SpriteActor {
 
     this.maxHp = 50;
     this.currentHp = this.maxHp;
-
-    this._interval = 10;
-    this._timeCount = 0;
-    this._velocityX = 0.3;
-    this._count = 0;
-
-    this.enemyPhase = 1;
+    
+    this._interval = 500;
+    this._timeCount = this._interval;
 
     // プレイヤーの弾に当たったらHPを減らす
     this.addEventListener('hit', (e) => {
@@ -122,61 +165,18 @@ class Enemy extends SpriteActor {
     });
   }
 
-  // degree度の方向にspeedの速さで弾を発射する
-  shootBullet(degree, speed) {
-    const rad = degree / 180 * Math.PI;
-    const velocityX = Math.cos(rad) * speed;
-    const velocityY = Math.sin(rad) * speed;
-    
-    const bullet = new EnemyBullet(this.x, this.y, velocityX, velocityY);
-    this.spawnActor(bullet);
-  }
-
-  // num個の弾を円形に発射する
-  shootCircularBullets(num, speed, initialDegree) {
-    const degree = 360 / num;
-    for(let i = 0; i < num; i++) {
-      switch (this.enemyPhase) {
-        case 1:
-          this.shootBullet(degree * i, speed);
-          break;
-        case 2:
-          this.shootBullet(initialDegree + degree * i, speed);
-          break;
-        default:
-          break;
-      }
-      
-      
-    }
-  }
-
   update(gameInfo, input) {
-    // 左右に移動する
-    this.x += this._velocityX;
-    if(this.x <= 100 || this.x >= 200) { this._velocityX *= -1; }
-    
     // インターバルを経過していたら弾を撃つ
     this._timeCount++;
     if(this._timeCount > this._interval) {
-      this._count += 10;
-      this.shootCircularBullets(10, 1, this._count);
+      const spawner = new SpiralBulletsSpawner(this.x, this.y, 4);
+      this.spawnActor(spawner);
       this._timeCount = 0;
     }
 
     // HPがゼロになったらdestroyする
     if(this.currentHp <= 0) {
-      switch(this.enemyPhase) {
-        case 1:
-          this.enemyPhase++;
-          this.currentHp = this.maxHp;
-          break;
-        case 2:
-          this.destroy();
-          break;
-        default:
-          break;
-      }
+      this.destroy();
     }
   }
 }
