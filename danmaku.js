@@ -106,9 +106,12 @@ class Enemy extends SpriteActor {
     this.maxHp = 50;
     this.currentHp = this.maxHp;
 
-    this._interval = 120;
+    this._interval = 10;
     this._timeCount = 0;
     this._velocityX = 0.3;
+    this._count = 0;
+
+    this.enemyPhase = 1;
 
     // プレイヤーの弾に当たったらHPを減らす
     this.addEventListener('hit', (e) => {
@@ -130,10 +133,21 @@ class Enemy extends SpriteActor {
   }
 
   // num個の弾を円形に発射する
-  shootCircularBullets(num, speed) {
+  shootCircularBullets(num, speed, initialDegree) {
     const degree = 360 / num;
     for(let i = 0; i < num; i++) {
-      this.shootBullet(degree * i, speed);
+      switch (this.enemyPhase) {
+        case 1:
+          this.shootBullet(degree * i, speed);
+          break;
+        case 2:
+          this.shootBullet(initialDegree + degree * i, speed);
+          break;
+        default:
+          break;
+      }
+      
+      
     }
   }
 
@@ -145,13 +159,24 @@ class Enemy extends SpriteActor {
     // インターバルを経過していたら弾を撃つ
     this._timeCount++;
     if(this._timeCount > this._interval) {
-      this.shootCircularBullets(15, 1);
+      this._count += 10;
+      this.shootCircularBullets(10, 1, this._count);
       this._timeCount = 0;
     }
 
     // HPがゼロになったらdestroyする
     if(this.currentHp <= 0) {
-      this.destroy();
+      switch(this.enemyPhase) {
+        case 1:
+          this.enemyPhase++;
+          this.currentHp = this.maxHp;
+          break;
+        case 2:
+          this.destroy();
+          break;
+        default:
+          break;
+      }
     }
   }
 }
