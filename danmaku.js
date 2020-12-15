@@ -123,7 +123,7 @@ class SpiralBulletsSpawner extends Actor {
     }
 
     // インターバル経過までは何もしない
-    this._timeCount ++;
+    this._timeCount++;
     if(this._timeCount < this._interval) { return; }
     this._timeCount = 0;
     
