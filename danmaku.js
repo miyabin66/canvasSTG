@@ -155,8 +155,8 @@ class FireworksBullet extends EnemyBullet {
   // degree度の方向にspeedの速さで弾を発射する
   shootBullet(degree, speed) {
     const rad = degree / 180 * Math.PI;
-    const velocityX = Math.cos(rad) * speed;
-    const velocityY = Math.sin(rad) * speed;
+    const velocityX = Math.cos(rad) * speed / 4;
+    const velocityY = Math.sin(rad) * speed / 4;
 
     const bullet = new EnemyBullet(this.x, this.y, velocityX, velocityY);
     this.spawnActor(bullet);
@@ -178,7 +178,7 @@ class FireworksBullet extends EnemyBullet {
     
     // 爆発時間を超えたら弾を生成して自身を破棄する
     if(this._eplasedTime > this.explosionTime) {
-      this.shootCircularBullets(10, 2);
+      this.shootCircularBullets(10, 10);
       this.destroy();
     }
   }
@@ -193,7 +193,7 @@ class Enemy extends SpriteActor {
     this.maxHp = 50;
     this.currentHp = this.maxHp;
     
-    this._interval = 100;
+    this._fireInterval = 20;
     this._timeCount = 0;
 
     // プレイヤーの弾に当たったらHPを減らす
@@ -208,10 +208,10 @@ class Enemy extends SpriteActor {
   update(gameInfo, input) {
     // インターバルを経過していたら弾を撃つ
     this._timeCount++;
-    if(this._timeCount > this._interval) {
-      const spdX = Math.random() * 4 - 2; // -2〜+2
-      const spdY = Math.random() * 4 - 2;
-      const explosionTime = 50;
+    if(this._timeCount > this._fireInterval) {
+      const spdX = Math.random() * 10 - 5;
+      const spdY = Math.random() * 10;
+      const explosionTime = 40;
       const bullet = new FireworksBullet(this.x, this.y, spdX, spdY, explosionTime);
       this.spawnActor(bullet);
       this._timeCount = 0;
