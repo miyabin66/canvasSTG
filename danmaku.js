@@ -196,6 +196,8 @@ class Enemy extends SpriteActor {
     this._fireInterval = 20;
     this._timeCount = 0;
 
+    this.phase = 'fireflower';
+
     // プレイヤーの弾に当たったらHPを減らす
     this.addEventListener('hit', (e) => {
       if(e.target.hasTag('playerBullet')) {
@@ -208,18 +210,29 @@ class Enemy extends SpriteActor {
   update(gameInfo, input) {
     // インターバルを経過していたら弾を撃つ
     this._timeCount++;
-    if(this._timeCount > this._fireInterval) {
-      const spdX = Math.random() * 10 - 5;
-      const spdY = Math.random() * 10;
-      const explosionTime = 40;
-      const bullet = new FireworksBullet(this.x, this.y, spdX, spdY, explosionTime);
-      this.spawnActor(bullet);
-      this._timeCount = 0;
-    }
-
-    // HPがゼロになったらdestroyする
-    if(this.currentHp <= 0) {
-      this.destroy();
+    switch (this.phase) {
+      case 'fireflower':
+        if(this._timeCount > this._fireInterval) {
+          const spdX = Math.random() * 10 - 5;
+          const spdY = Math.random() * 10;
+          const explosionTime = 30;
+          const bullet = new FireworksBullet(this.x, this.y, spdX, spdY, explosionTime);
+          this.spawnActor(bullet);
+          this._timeCount = 0;
+        }
+    
+        // HPがゼロになったらdestroyする
+        if(this.currentHp <= 0) {
+          this.maxHp = 50;
+          this.phase = 'rain';
+        }
+        break;
+      case 'rain':
+        // HPがゼロになったらdestroyする
+        if(this.currentHp <= 0) {
+          this.destroy();
+        }
+        break;
     }
   }
 }
