@@ -141,7 +141,7 @@ class SpriteActor extends Actor {
     rect.x, rect.y,
     rect.width, rect.height,
     this.x, this.y,
-    rect.width, rect.height
+    rect.width * 2, rect.height * 2
     );
   }
 
@@ -307,6 +307,8 @@ class Game {
     this.screenCanvas = document.createElement('canvas');
     this.screenCanvas.width = width;
     this.screenCanvas.height = height;
+
+    this.screenCanvas.setAttribute('style', 'position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; width: 75vh; height: 100vh;')
 
     this._inputReceiver = new InputReceiver();
     this._prevTimestamp = 0;

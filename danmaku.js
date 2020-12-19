@@ -229,7 +229,7 @@ class EnemyHpBar extends Actor {
     const hitArea = new Rectangle(0, 0, 0, 0);
     super(x, y, hitArea);
 
-    this._width = 200;
+    this._width = 400;
     this._height = 10;
     
     this._innerWidth = this._width;
@@ -262,7 +262,7 @@ class TextLabel extends Actor {
 
   render(target) {
     const context = target.getContext('2d');
-    context.font = '25px sans-serif';
+    context.font = '50px sans-serif';
     context.fillStyle = 'white';
     context.fillText(this.text, this.x, this.y);
   }
@@ -271,7 +271,7 @@ class TextLabel extends Actor {
 class DanmakuStgEndScene extends Scene {
   constructor(renderingTarget) {
     super('クリア', 'black', renderingTarget);
-    const text = new TextLabel(60, 200, 'ゲームクリア！');
+    const text = new TextLabel(150, 400, 'Game Clear!');
     this.add(text);
   }
 }
@@ -279,7 +279,7 @@ class DanmakuStgEndScene extends Scene {
 class DanmakuStgGameOverScene extends Scene {
   constructor(renderingTarget) {
     super('ゲームオーバー', 'black', renderingTarget);
-    const text = new TextLabel(50, 200, 'ゲームオーバー…');
+    const text = new TextLabel(160, 400, 'Game Over!');
     this.add(text);
   }
 }
@@ -287,7 +287,7 @@ class DanmakuStgGameOverScene extends Scene {
 class DanmakuStgTitleScene extends Scene {
   constructor(renderingTarget) {
     super('タイトル', 'black', renderingTarget);
-    const title = new TextLabel(100, 200, '弾幕STG');
+    const title = new TextLabel(230, 400, '弾幕STG');
     this.add(title);
   }
 
@@ -303,9 +303,9 @@ class DanmakuStgTitleScene extends Scene {
 class DanmakuStgMainScene extends Scene {
   constructor(renderingTarget) {
     super('メイン', 'black', renderingTarget);
-    const fighter = new Fighter(150, 300);
-    const enemy = new Enemy(150, 100);
-    const hpBar = new EnemyHpBar(50, 20, enemy);
+    const fighter = new Fighter(300, 600);
+    const enemy = new Enemy(300, 200);
+    const hpBar = new EnemyHpBar(100, 40, enemy);
     this.add(fighter);
     this.add(enemy);
     this.add(hpBar);
@@ -326,7 +326,7 @@ class DanmakuStgMainScene extends Scene {
 
 class DanmakuStgGame extends Game {
   constructor() {
-    super('弾幕STG', 300, 400, 60);
+    super('弾幕STG', 600, 800, 60);
     const titleScene = new DanmakuStgTitleScene(this.screenCanvas);
     this.changeScene(titleScene);
   }
