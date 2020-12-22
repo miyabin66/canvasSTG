@@ -312,14 +312,11 @@ class Game {
 
     this._inputReceiver = new InputReceiver();
     this._prevTimestamp = 0;
-
-    console.log(`${title}が初期化されました。`);
   }
 
   changeScene(newScene) {
     this.currentScene = newScene;
     this.currentScene.addEventListener('changescene', (e) => this.changeScene(e.target));
-    console.log(`シーンが${newScene.name}に切り替わりました。`);
   }
 
   start() {
