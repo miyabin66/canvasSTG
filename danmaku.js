@@ -297,6 +297,14 @@ class DanmakuStgEndScene extends Scene {
     const text = new TextLabel(150, 400, 'Game Clear!');
     this.add(text);
   }
+
+  update(gameInfo, input) {
+    super.update(gameInfo, input);
+    if(input.getKeyDown(' ')) {
+      const mainScene = new DanmakuStgTitleScene(this.renderingTarget);
+      this.changeScene(mainScene);
+    }
+  }
 }
 
 class DanmakuStgGameOverScene extends Scene {
@@ -305,12 +313,20 @@ class DanmakuStgGameOverScene extends Scene {
     const text = new TextLabel(160, 400, 'Game Over!');
     this.add(text);
   }
+
+  update(gameInfo, input) {
+    super.update(gameInfo, input);
+    if(input.getKeyDown(' ')) {
+      const mainScene = new DanmakuStgTitleScene(this.renderingTarget);
+      this.changeScene(mainScene);
+    }
+  }
 }
 
 class DanmakuStgTitleScene extends Scene {
   constructor(renderingTarget) {
     super('タイトル', 'black', renderingTarget);
-    const title = new TextLabel(230, 400, '弾幕STG');
+    const title = new TextLabel(200, 400, '弾幕STG');
     this.add(title);
   }
 
