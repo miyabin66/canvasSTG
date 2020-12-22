@@ -29,7 +29,7 @@ class Fighter extends SpriteActor {
     const hitArea = new Rectangle(8, 8, 2, 2);
     super(x, y, sprite, hitArea);
 
-    this._interval = 5;
+    this._interval = 10;
     this._timeCount = 0;
     this._speed = 3;
     this._velocityX = 0;
@@ -136,7 +136,7 @@ class SpiralBulletsSpawner extends Actor {
     const bX = this.x + Math.cos(rad) * this._radius;
     const bY = this.y + Math.sin(rad) * this._radius;
     const bSpdX = Math.random() * 2 - 1; // -1〜+1
-    const bSpdY = Math.random() * 2 - 1;
+    const bSpdY = Math.random() * 4;
     const bullet = new EnemyBullet(bX, bY, bSpdX, bSpdY, true);
     this._bullets.push(bullet);
 
@@ -194,9 +194,12 @@ class Enemy extends SpriteActor {
     this.currentHp = this.maxHp;
     
     this._fireInterval = 20;
-    this._timeCount = 0;
+    this._fireTimeCount = 0;
 
-    this.phase = 'fireflower';
+    this._spiralInterval = 100;
+    this._spiralTimeCount = this._spiralInterval;
+
+    this.phase = 'spiral';
 
     // プレイヤーの弾に当たったらHPを減らす
     this.addEventListener('hit', (e) => {
@@ -209,28 +212,35 @@ class Enemy extends SpriteActor {
 
   update(gameInfo, input) {
     // インターバルを経過していたら弾を撃つ
-    this._timeCount++;
+    this._fireTimeCount++;
     switch (this.phase) {
       case 'fireflower':
-        if(this._timeCount > this._fireInterval) {
+        if(this._fireTimeCount > this._fireInterval) {
           const spdX = Math.random() * 10 - 5;
           const spdY = Math.random() * 10;
           const explosionTime = 30;
           const bullet = new FireworksBullet(this.x, this.y, spdX, spdY, explosionTime);
           this.spawnActor(bullet);
-          this._timeCount = 0;
+          this._fireTimeCount = 0;
         }
     
         // HPがゼロになったらdestroyする
         if(this.currentHp <= 0) {
-          this.maxHp = 50;
-          this.phase = 'rain';
+          this.destroy();
         }
         break;
-      case 'rain':
-        // HPがゼロになったらdestroyする
+      case 'spiral':
+        // インターバルを経過していたら弾を撃つ
+        this._spiralTimeCount++;
+        if(this._spiralTimeCount > this._spiralInterval) {
+            this.spawnActor(new SpiralBulletsSpawner(this.x, this.y, 1));
+            this._spiralTimeCount = 0;
+        }
+
+        // HPがゼロになったらphase2に移行する
         if(this.currentHp <= 0) {
-          this.destroy();
+          this.currentHp = 50;
+          this.phase = 'fireflower';
         }
         break;
     }
